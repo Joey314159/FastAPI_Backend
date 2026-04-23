@@ -4,15 +4,22 @@ from fastapi import FastAPI
 app = FastAPI()
 
 BOOKS = [
-    {"Title: ": "Title One", "Author: ": "Author One", "Category: ": "Science"},
-    {"Title: ": "Title Two", "Author: ": "Author Two", "Category: ": "Science"},
-    {"Title: ": "Title Three", "Author: ": "Author Three", "Category: ": "Science"},
-    {"Title: ": "Title Four", "Author: ": "Author Four", "Category: ": "Science"},
-    {"Title: ": "Title Five", "Author: ": "Author Five", "Category: ": "Science"},
-    {"Title: ": "Title Six", "Author: ": "Author Six", "Category: ": "Science"},
+    {"title": "Title One", "author": "Author One", "category": "Science"},
+    {"title": "Title Two", "author": "Author Two", "category": "Science"},
+    {"title": "Title Three", "author": "Author Three", "category": "Science"},
+    {"title": "Title Four", "author": "Author Four", "category": "Science"},
+    {"title": "Title Five", "author": "Author Five", "category": "Science"},
+    {"title": "Title Six", "author": "Author Six", "category": "Science"},
 ]
 
 
-@app.get("/")
-async def firstFN():
-    return {"Message ": "Hello World"}
+@app.get("/Books")
+async def readBooks():
+    return BOOKS
+
+
+@app.get("/Books/{book_Title}")
+async def readBook(book_Title: str):
+    for b in BOOKS:
+        if b.get("title").casefold() == book_Title.casefold():
+            return b
