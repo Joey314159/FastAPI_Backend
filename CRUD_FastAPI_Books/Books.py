@@ -4,12 +4,12 @@ from fastapi import FastAPI
 app = FastAPI()
 
 BOOKS = [
-    {"title": "Title One", "author": "Author One", "category": "Science"},
-    {"title": "Title Two", "author": "Author Two", "category": "Science"},
-    {"title": "Title Three", "author": "Author Three", "category": "Science"},
-    {"title": "Title Four", "author": "Author Four", "category": "Science"},
-    {"title": "Title Five", "author": "Author Five", "category": "Science"},
-    {"title": "Title Six", "author": "Author Six", "category": "Science"},
+    {"title": "Title One", "author": "Author One", "category": "science"},
+    {"title": "Title Two", "author": "Author Two", "category": "science"},
+    {"title": "Title Three", "author": "Author Three", "category": "history"},
+    {"title": "Title Four", "author": "Author Four", "category": "math"},
+    {"title": "Title Five", "author": "Author Five", "category": "math"},
+    {"title": "Title Six", "author": "Author Two", "category": "math"},
 ]
 
 
@@ -23,3 +23,30 @@ async def readBook(book_Title: str):
     for b in BOOKS:
         if b.get("title").casefold() == book_Title.casefold():
             return b
+
+
+@app.get("/Books/")
+async def readCategory(category):
+    booksToReturn = []
+
+    for b in BOOKS:
+        if b.get("category").casefold() == category.casefold():
+            booksToReturn.append(b)
+
+    return booksToReturn
+
+
+# Path parameter needed to find the location of where the data you want is at
+@app.get("/Books/{book_Author}/")
+# Then you will have to use query parameter to filter the data we want to return
+async def readAuthor(book_Author: str, category: str):
+    books2Return = []
+
+    for b in BOOKS:
+        if (
+            b.get("author").casefold() == book_Author.casefold()
+            and b.get("category") == category.casefold()
+        ):
+            books2Return.append(b)
+
+    return books2Return
