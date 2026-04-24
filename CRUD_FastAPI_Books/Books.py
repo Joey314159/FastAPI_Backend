@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import Body, FastAPI
 
 # Allows uvicorn understand that we are creating a new app object
 app = FastAPI()
@@ -50,3 +50,24 @@ async def readAuthor(book_Author: str, category: str):
             books2Return.append(b)
 
     return books2Return
+
+
+# Only the post request uses the Body() not the get request
+@app.post("/books/createBook")
+async def createBook(newBook=Body()):
+    BOOKS.append(newBook)
+
+
+@app.put("/books/updateBook")
+async def update(updatedBook=Body()):
+    for i in range(len(BOOKS)):
+        if BOOKS[i].get("title").casefold() == updatedBook.get("title").casefold():
+            BOOKS[i] = updatedBook
+
+
+@app.delete("/books/deleteBook/{bookTitle}")
+async def deleteBook(bookTitle: str):
+    for i in range(len(BOOKS)):
+        if BOOKS[i].get("title").casefold() == bookTitle.casefold():
+            BOOKS.pop(i)
+            break
