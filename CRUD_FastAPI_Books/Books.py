@@ -1,4 +1,5 @@
-from fastapi import Body, FastAPI
+from fastapi import Body, FastAPI, HTTPException
+from pydantic import BaseModel
 
 # Allows uvicorn understand that we are creating a new app object
 app = FastAPI()
@@ -22,8 +23,10 @@ async def readBooks():
 @app.get("/Books/{book_Title}")
 async def readBook(book_Title: str):
     for b in BOOKS:
-        if b.get("title").casefold() == book_Title.casefold():
+        title = b.get("title")
+        if title and title.casefold() == book_Title.casefold():
             return b
+    raise HTTPException(status_code=404, detail="Book not found")
 
 
 @app.get("/Books/")
@@ -31,7 +34,8 @@ async def readCategory(category):
     booksToReturn = []
 
     for b in BOOKS:
-        if b.get("category").casefold() == category.casefold():
+        category = b.get("category")
+        if category and category.casefold() == category.casefold():
             booksToReturn.append(b)
 
     return booksToReturn
@@ -44,8 +48,11 @@ async def readAuthor(book_Author: str, category: str):
     books2Return = []
 
     for b in BOOKS:
+        author = b.get("author")
+        category = b.get("category")
         if (
-            b.get("author").casefold() == book_Author.casefold()
+            author
+            and author.casefold() == book_Author.casefold()
             and b.get("category") == category.casefold()
         ):
             books2Return.append(b)
@@ -79,7 +86,8 @@ async def readAuthorsBooks(authorsBooks: str):
     books2Return = []
 
     for b in BOOKS:
-        if b.get("author").casefold() == authorsBooks.casefold():
+        author = b.get("author")
+        if author.casefold() == authorsBooks.casefold():
             books2Return.append(b)
 
     return books2Return
