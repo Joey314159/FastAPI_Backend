@@ -1,4 +1,5 @@
-from fastapi import FastAPI, Body
+from fastapi import FastAPI
+from pydantic import BaseModel, Field
 
 app = FastAPI()
 
@@ -16,6 +17,14 @@ class Book:
         self.author = author
         self.description = description
         self.rating = rating
+
+
+class BookRequest(BaseModel):
+    id: int
+    title: str = Field(min_length=3)
+    author: str
+    description: str
+    rating: int
 
 
 BOOKS = [
@@ -66,5 +75,7 @@ async def readAllBooks():
 
 
 @app.post("/create_Book")
-async def create_Book(bookRequest=Body()):
-    BOOKS.append(bookRequest)
+# Body() does not allow us to do any validation of data coming into our application
+async def create_Book(book_Request: BookRequest):
+    newBooks = Book(**book_Request.model_dump())
+    BOOKS.append(newBooks)
