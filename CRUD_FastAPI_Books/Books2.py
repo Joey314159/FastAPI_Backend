@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from pydantic import BaseModel, Field
+from typing import Optional
 
 app = FastAPI()
 
@@ -20,10 +21,11 @@ class Book:
 
 
 class BookRequest(BaseModel):
-    id: int
+    id: Optional[int] = None
     title: str = Field(min_length=3)
     author: str = Field(min_length=1)
     description: str = Field(min_length=1, max_length=120)
+    # greater than 1, less than 6
     rating: int = Field(gt=-1, lt=6)
 
 
@@ -78,4 +80,13 @@ async def readAllBooks():
 # Body() does not allow us to do any validation of data coming into our application
 async def create_Book(book_Request: BookRequest):
     newBooks = Book(**book_Request.model_dump())
-    BOOKS.append(newBooks)
+    BOOKS.append(findBookID(newBooks))
+
+
+def findBookID(book: Book):
+    if len(BOOKS) > 0:
+        book.id = BOOKS[-1].id + 1
+    else:
+        book.id = 1
+
+    return book
