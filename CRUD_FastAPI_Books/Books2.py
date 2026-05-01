@@ -87,6 +87,23 @@ async def readAllBooks():
     return BOOKS
 
 
+@app.get("/Books/{book_ID}")
+async def readBook(book_ID: int):
+    for b in BOOKS:
+        if b.id == book_ID:
+            return b
+
+
+@app.get("/Books/")
+async def getByRating(bookRating: int):
+    booksToReturn = []
+
+    for b in BOOKS:
+        if b.rating == bookRating:
+            booksToReturn.append(b)
+    return booksToReturn
+
+
 @app.post("/create_Book")
 # Body() does not allow us to do any validation of data coming into our application
 async def create_Book(book_Request: BookRequest):
