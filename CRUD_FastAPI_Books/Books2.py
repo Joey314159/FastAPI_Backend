@@ -118,3 +118,18 @@ def findBookID(book: Book):
         book.id = 1
 
     return book
+
+
+@app.put("/Books/updateBook")
+async def updateBook(book: BookRequest):
+    for i in range(len(BOOKS)):
+        if book.id == BOOKS[i].id:
+            BOOKS[i] = book
+
+
+@app.delete("/Books/{book_id}")
+async def deleteBook(bookID: int):
+    for i in range(len(BOOKS)):
+        if BOOKS[i].id == bookID:
+            BOOKS.pop(i)
+            break
