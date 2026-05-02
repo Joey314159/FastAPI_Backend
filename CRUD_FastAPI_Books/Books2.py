@@ -11,13 +11,15 @@ class Book:
     author: str
     description: str
     rating: int
+    publishedDate: int
 
-    def __init__(self, id, title, author, description, rating) -> None:
+    def __init__(self, id, title, author, description, rating, publishedDate) -> None:
         self.id = id
         self.title = title
         self.author = author
         self.description = description
         self.rating = rating
+        self.publishedDate = publishedDate
 
 
 class BookRequest(BaseModel):
@@ -27,6 +29,7 @@ class BookRequest(BaseModel):
     description: str = Field(min_length=1, max_length=120)
     # greater than 1, less than 6
     rating: int = Field(gt=-1, lt=6)
+    publishedDate: int = Field(gt=1680, lt=2027)
 
     model_config = {
         "json_schema_extra": {
@@ -35,6 +38,7 @@ class BookRequest(BaseModel):
                 "author": "codingWithRoby",
                 "description": "A very good book",
                 "rating": "",
+                "publishedDate": "",
             }
         }
     }
@@ -47,6 +51,7 @@ BOOKS = [
         "Sebesta",
         "Goes over the syntax and semantics of Programming Languages",
         5,
+        2000,
     ),
     Book(
         2,
@@ -54,6 +59,7 @@ BOOKS = [
         "Larson Edwards",
         "The continuation of calculus",
         4,
+        2010,
     ),
     Book(
         3,
@@ -61,6 +67,7 @@ BOOKS = [
         "Lafore",
         "Fundamental for anyone studying Computer Science",
         5,
+        2003,
     ),
     Book(
         4,
@@ -68,9 +75,15 @@ BOOKS = [
         "Gayle Laakmann",
         "The trick to passing the technical portion of the interview",
         5,
+        2000,
     ),
     Book(
-        5, "Differential Equations", "Zill", "The final book of the calculus studies", 4
+        5,
+        "Differential Equations",
+        "Zill",
+        "The final book of the calculus studies",
+        4,
+        1990,
     ),
     Book(
         6,
@@ -78,6 +91,7 @@ BOOKS = [
         "Tony Gaddis",
         "Goes over the syntax and semantics of the C++ Programming Language",
         5,
+        2001,
     ),
 ]
 
@@ -85,13 +99,6 @@ BOOKS = [
 @app.get("/Books")
 async def readAllBooks():
     return BOOKS
-
-
-@app.get("/Books/{book_ID}")
-async def readBook(book_ID: int):
-    for b in BOOKS:
-        if b.id == book_ID:
-            return b
 
 
 @app.get("/Books/")
@@ -102,6 +109,24 @@ async def getByRating(bookRating: int):
         if b.rating == bookRating:
             booksToReturn.append(b)
     return booksToReturn
+
+
+@app.get("/Books/publishedDate/{published_Date}")
+async def getByPublishedDate(published_Date: int):
+    publishedYearBooks = []
+
+    for b in BOOKS:
+        if b.publishedDate == published_Date:
+            publishedYearBooks.append(b)
+
+    return publishedYearBooks
+
+
+@app.get("/Books/{book_ID}")
+async def readBook(book_ID: int):
+    for b in BOOKS:
+        if b.id == book_ID:
+            return b
 
 
 @app.post("/create_Book")
@@ -128,8 +153,8 @@ async def updateBook(book: BookRequest):
 
 
 @app.delete("/Books/{book_id}")
-async def deleteBook(bookID: int):
+async def deleteBook(book_id: int):
     for i in range(len(BOOKS)):
-        if BOOKS[i].id == bookID:
+        if BOOKS[i].id == book_id:
             BOOKS.pop(i)
             break
