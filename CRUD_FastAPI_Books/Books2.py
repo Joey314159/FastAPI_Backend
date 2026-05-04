@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Path, Query
 from pydantic import BaseModel, Field
 from typing import Optional
 
@@ -102,7 +102,7 @@ async def readAllBooks():
 
 
 @app.get("/Books/")
-async def getByRating(bookRating: int):
+async def getByRating(bookRating: int = Query(gt=0, lt=6)):
     booksToReturn = []
 
     for b in BOOKS:
@@ -111,19 +111,20 @@ async def getByRating(bookRating: int):
     return booksToReturn
 
 
-@app.get("/Books/publishedDate/{published_Date}")
-async def getByPublishedDate(published_Date: int):
+@app.get("/Books/publishedDate/")
+async def getByPublishedDate(publishedDate: int = Query(gt=1680, lt=2027)):
     publishedYearBooks = []
 
     for b in BOOKS:
-        if b.publishedDate == published_Date:
+        if b.publishedDate == publishedDate:
             publishedYearBooks.append(b)
 
     return publishedYearBooks
 
 
 @app.get("/Books/{book_ID}")
-async def readBook(book_ID: int):
+# We are adding extra validation to path parameters to ensure that the user is inputting valid data
+async def readBook(book_ID: int = Path(gt=0)):
     for b in BOOKS:
         if b.id == book_ID:
             return b
@@ -153,7 +154,7 @@ async def updateBook(book: BookRequest):
 
 
 @app.delete("/Books/{book_id}")
-async def deleteBook(book_id: int):
+async def deleteBook(book_id: int = Path(gt=0)):
     for i in range(len(BOOKS)):
         if BOOKS[i].id == book_id:
             BOOKS.pop(i)
