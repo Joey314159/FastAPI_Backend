@@ -1,5 +1,6 @@
-from fastapi import FastAPI, Path, Query
+from fastapi import FastAPI, Path, Query, HTTPException
 from pydantic import BaseModel, Field
+from starlette import status
 from typing import Optional
 
 app = FastAPI()
@@ -96,12 +97,12 @@ BOOKS = [
 ]
 
 
-@app.get("/Books")
+@app.get("/Books", status_code=status.HTTP_200_OK)
 async def readAllBooks():
     return BOOKS
 
 
-@app.get("/Books/")
+@app.get("/Books/", status_code=status.HTTP_200_OK)
 async def getByRating(bookRating: int = Query(gt=0, lt=6)):
     booksToReturn = []
 
@@ -111,7 +112,7 @@ async def getByRating(bookRating: int = Query(gt=0, lt=6)):
     return booksToReturn
 
 
-@app.get("/Books/publishedDate/")
+@app.get("/Books/publishedDate/", status_code=status.HTTP_200_OK)
 async def getByPublishedDate(publishedDate: int = Query(gt=1680, lt=2027)):
     publishedYearBooks = []
 
@@ -128,9 +129,10 @@ async def readBook(book_ID: int = Path(gt=0)):
     for b in BOOKS:
         if b.id == book_ID:
             return b
+    raise HTTPException(status_code=404, detail="Item not found")
 
 
-@app.post("/create_Book")
+@app.post("/create_Book", status_code=status.HTTP_201_CREATED)
 # Body() does not allow us to do any validation of data coming into our application
 async def create_Book(book_Request: BookRequest):
     newBooks = Book(**book_Request.model_dump())
@@ -146,16 +148,24 @@ def findBookID(book: Book):
     return book
 
 
-@app.put("/Books/updateBook")
+@app.put("/Books/updateBook", status_code=status.HTTP_204_NO_CONTENT)
 async def updateBook(book: BookRequest):
+    bookUpdated = False
     for i in range(len(BOOKS)):
         if book.id == BOOKS[i].id:
             BOOKS[i] = book
+            bookUpdated = True
+    if not bookUpdated:
+        raise HTTPException(status_code=404, detail="Nah fam, shit ain't here")
 
 
 @app.delete("/Books/{book_id}")
 async def deleteBook(book_id: int = Path(gt=0)):
+    bookUpdated = False
     for i in range(len(BOOKS)):
         if BOOKS[i].id == book_id:
             BOOKS.pop(i)
+            bookUpdated = True
             break
+    if not bookUpdated:
+        raise HTTPException(status_code=404, detail="What u lookin fo?")
