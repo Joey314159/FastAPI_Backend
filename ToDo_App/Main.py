@@ -6,10 +6,13 @@ import Models
 from starlette import status
 from Models import Todos
 from Database import SessionLocal, engine
+from routers import Auth
 
 app = FastAPI()
 
 Models.Base.metadata.create_all(bind=engine)
+
+app.include_router(Auth.router)
 
 
 def getDB():
