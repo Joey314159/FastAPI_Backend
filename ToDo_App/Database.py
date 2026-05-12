@@ -20,7 +20,7 @@ from sqlalchemy.ext.declarative import declarative_base
         from Base, SQL_ALCHEMY recognizes a python class as a database table rather than a regular class. It is the 
         blueprint manager that connects our python models to the actual structure of the database
 """
-SQL_ALCHEMY_URL = "sqlite:///./todos.db"
+SQL_ALCHEMY_URL = "sqlite:///./todosapp.db"
 """
         The reason why we are putting to check_same_thread to be false is because by default SQL Lite only allows one 
         thread to communicate with the data base. The reason SQL Lite does this is to prevent any kind of accident sharing 
