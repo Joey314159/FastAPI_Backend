@@ -6,6 +6,7 @@ from passlib.context import CryptContext
 from Database import SessionLocal
 from typing import Annotated
 from sqlalchemy.orm import Session
+from fastapi.security import OAuth2PasswordRequestForm
 
 
 router = APIRouter()
@@ -37,6 +38,17 @@ dbDependancy = Annotated[Session, Depends(getDB)]
 #                                 ^^^^^^^^^^^^^---- Tells FastAPI 'whenever a route needs this, automatically run getDB() and inject the results'
 
 
+def authenticateUser(username: str, password: str, db):
+    user = db.query(Users).filter(Users.username == username).first()
+
+    if not user:
+        return False
+
+    if not bcrypt_context.verify(password, user.hashedPWD):
+        return False
+    return True
+
+
 @router.post("/auth", status_code=status.HTTP_201_CREATED)
 async def createUser(db: dbDependancy, createUserRequest: CreateUserRequest):
     createUserModel = Users(
@@ -53,3 +65,14 @@ async def createUser(db: dbDependancy, createUserRequest: CreateUserRequest):
 
     db.add(createUserModel)
     db.commit()
+
+
+@router.post("/token")
+async def loginForAcessToken(
+    formData: Annotated[OAuth2PasswordRequestForm, Depends()], db: dbDependancy
+):
+    user = authenticateUser(formData.username, formData.password, db)
+
+    if not user:
+        return "Failed Authentication"
+    return "Successful Authentication"
