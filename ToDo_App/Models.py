@@ -7,7 +7,19 @@ from Database import Base
 
     A database model is going to be the actual record that is inside a database table
 """
-from sqlalchemy import Column, Integer, String, Boolean
+from sqlalchemy import Column, ForeignKey, Integer, String, Boolean
+
+
+class Users(Base):
+    __tablename__ = "users"
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String, unique=True)
+    username = Column(String, unique=True)
+    firstName = Column(String)
+    lastName = Column(String)
+    hashedPWD = Column(String)
+    isActive = Column(Boolean, default=True)
+    role = Column(String)
 
 
 class Todos(Base):
@@ -17,3 +29,4 @@ class Todos(Base):
     description = Column(String)
     priority = Column(Integer)
     complete = Column(Boolean, default=False)
+    owner = Column(Integer, ForeignKey("users.id"))
