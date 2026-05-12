@@ -1,8 +1,16 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+from starlette import status
 from pydantic import BaseModel
 from Models import Users
+from passlib.context import CryptContext
+from Database import SessionLocal
+from typing import Annotated
+from sqlalchemy.orm import Session
+
 
 router = APIRouter()
+
+bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 class CreateUserRequest(BaseModel):
@@ -14,16 +22,34 @@ class CreateUserRequest(BaseModel):
     role: str
 
 
-@router.post("/auth")
-async def createUser(createUserRequest: CreateUserRequest):
+def getDB():
+    db = SessionLocal()
+    try:
+        # Pauses the function and gives the session to your route
+        yield db
+    finally:
+        # Ensures we never leave a Database connection open by closing it immediately afterwards
+        db.close()
+
+
+# First dependancy injection
+dbDependancy = Annotated[Session, Depends(getDB)]
+#                                 ^^^^^^^^^^^^^---- Tells FastAPI 'whenever a route needs this, automatically run getDB() and inject the results'
+
+
+@router.post("/auth", status_code=status.HTTP_201_CREATED)
+async def createUser(db: dbDependancy, createUserRequest: CreateUserRequest):
     createUserModel = Users(
         email=createUserRequest.email,
         username=createUserRequest.username,
         firstName=createUserRequest.firstName,
         lastName=createUserRequest.lastName,
         role=createUserRequest.role,
-        hashedPWD=createUserRequest.password,
+        # We never store the raw password from the user instead we transform into a hash string
+        # This means that even if someone got access into our database they would only see the hash
+        hashedPWD=bcrypt_context.hash(createUserRequest.password),
         isActive=True,
     )
 
-    return createUserModel
+    db.add(createUserModel)
+    db.commit()
