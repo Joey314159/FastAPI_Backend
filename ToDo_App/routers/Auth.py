@@ -11,7 +11,7 @@ from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from jose import jwt, JWTError
 
 
-router = APIRouter()
+router = APIRouter(prefix="/auth", tags=["auth"])
 
 # Obtained this string by typing in the terminal the following command:  openssl rand -hex 32
 SECRET_KEY = "2ee739d3cd6b1d67debe8011b8ff68538766d78685778f4cb45b74af287fc273"
@@ -19,7 +19,7 @@ SECRET_KEY = "2ee739d3cd6b1d67debe8011b8ff68538766d78685778f4cb45b74af287fc273"
 ALGORITHM = "HS256"
 
 bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2Bearer = OAuth2PasswordBearer(tokenUrl="token")
+oauth2Bearer = OAuth2PasswordBearer(tokenUrl="auth/token")
 
 
 class CreateUserRequest(BaseModel):
@@ -88,7 +88,7 @@ async def getCurrentUser(token: Annotated[str, Depends(oauth2Bearer)]):
         )
 
 
-@router.post("/auth", status_code=status.HTTP_201_CREATED)
+@router.post("/", status_code=status.HTTP_201_CREATED)
 async def createUser(db: dbDependancy, createUserRequest: CreateUserRequest):
     createUserModel = Users(
         email=createUserRequest.email,
@@ -113,7 +113,10 @@ async def loginForAcessToken(
     user = authenticateUser(formData.username, formData.password, db)
 
     if not user:
-        return "Failed Authentication"
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+        )
     token = createAccessToken(user.username, user.id, timedelta(minutes=20))
 
     return {"accessToken": token, "tokenType": "bearer"}
