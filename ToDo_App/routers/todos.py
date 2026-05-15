@@ -43,12 +43,21 @@ class TodoRequest(BaseModel):
 
 @router.get("/", status_code=status.HTTP_200_OK)
 async def readAll(user: userDependency, db: dbDependancy):
+    if user is None:
+        raise HTTPException(status_code=401, detail="Authentication Failed")
     return db.query(Todos).filter(Todos.owner == user.get("id")).all()
 
 
 @router.get("/todo/{todo_id}", status_code=status.HTTP_200_OK)
-async def readTodo(db: dbDependancy, todo_id: int = Path(gt=0)):
-    todoModel = db.query(Todos).filter(Todos.id == todo_id).first()
+async def readTodo(user: userDependency, db: dbDependancy, todo_id: int = Path(gt=0)):
+    if user is None:
+        raise HTTPException(status_code=401, detail="Authentication Failed")
+    todoModel = (
+        db.query(Todos)
+        .filter(Todos.id == todo_id)
+        .filter(Todos.owner == user.get("id"))
+        .first()
+    )
 
     if todoModel is not None:
         return todoModel
