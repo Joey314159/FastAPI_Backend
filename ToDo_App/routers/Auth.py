@@ -31,9 +31,21 @@ class CreateUserRequest(BaseModel):
     role: str
 
 
+"""
+    Here the field names 'access_token' and 'token_type' are REQUIRED by the OAuth2 specification. When Swagger's 
+    "Authorize" button calls /auth/token, it parses the JSON response and looks for a key LITERALLY named "access_token". 
+    If it finds "accessToken" instead, it doesn't  recognize it, stores nothing, and every subsequent request goes 
+    out with no token — causing a 401 Unauthorized.
+
+    Rule of thumb:
+        - Your own internal variables → name them whatever you want
+        - Fields that get serialized into JSON for an external system/spec → names are non-negotiable
+"""
+
+
 class Token(BaseModel):
-    accessToken: str
-    tokenType: str
+    access_token: str
+    token_type: str
 
 
 def getDB():
@@ -119,4 +131,5 @@ async def loginForAcessToken(
         )
     token = createAccessToken(user.username, user.id, timedelta(minutes=20))
 
-    return {"accessToken": token, "tokenType": "bearer"}
+    # Here like we mentioned above 'access_token' and token_type are non-negotiable returns
+    return {"access_token": token, "token_type": "bearer"}
