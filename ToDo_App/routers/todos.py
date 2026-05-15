@@ -7,6 +7,7 @@ from starlette import status
 from Models import Todos
 from Database import SessionLocal, engine
 from routers import Auth
+from .Auth import getCurrentUser
 
 router = APIRouter()
 
@@ -30,6 +31,7 @@ dbDependancy = Annotated[Session, Depends(getDB)]
 #                                 ^^^^^^^^^^^^^---- Tells FastAPI 'whenever a route needs this, automatically run getDB() and inject the results'
 #    This is helpful because instead of each route managing its own database session; we define it once and FastAPI
 #    knows to write it in wherever you ask for it
+userDependency = Annotated[dict, Depends(getCurrentUser)]
 
 
 class TodoRequest(BaseModel):
@@ -54,8 +56,11 @@ async def readTodo(db: dbDependancy, todo_id: int = Path(gt=0)):
 
 
 @router.post("/todo", status_code=status.HTTP_201_CREATED)
-async def createTodo(db: dbDependancy, todoRequest: TodoRequest):
-    todoModel = Todos(**todoRequest.model_dump())
+async def createTodo(user: userDependency, db: dbDependancy, todoRequest: TodoRequest):
+    if user is None:
+        raise HTTPException(status_code=401, detail="Authentication Failed")
+
+    todoModel = Todos(**todoRequest.model_dump(), owner=user.get("id"))
     db.add(todoModel)
     db.commit()
 
