@@ -74,8 +74,8 @@ def authenticateUser(username: str, password: str, db):
     return user
 
 
-def createAccessToken(username: str, userID: int, expiresDelta: timedelta):
-    encode = {"sub": username, "id": userID}
+def createAccessToken(username: str, userID: int, role: str, expiresDelta: timedelta):
+    encode = {"sub": username, "id": userID, "role": role}
     expires = datetime.now(timezone.utc) + expiresDelta
     encode.update({"exp": expires})
     return jwt.encode(encode, SECRET_KEY, algorithm=ALGORITHM)
@@ -86,13 +86,14 @@ async def getCurrentUser(token: Annotated[str, Depends(oauth2Bearer)]):
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
         userID: int = payload.get("id")
+        userRole: str = payload.get("role")
 
         if username is None or userID is None:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Could not validate credentials",
             )
-        return {"username": username, "userID": userID}
+        return {"username": username, "userID": userID, "userRole": userRole}
     except JWTError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -129,7 +130,7 @@ async def loginForAcessToken(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",
         )
-    token = createAccessToken(user.username, user.id, timedelta(minutes=20))
+    token = createAccessToken(user.username, user.id, user.role, timedelta(minutes=20))
 
     # Here like we mentioned above 'access_token' and token_type are non-negotiable returns
     return {"access_token": token, "token_type": "bearer"}
