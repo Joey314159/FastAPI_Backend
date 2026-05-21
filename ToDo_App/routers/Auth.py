@@ -93,7 +93,7 @@ async def getCurrentUser(token: Annotated[str, Depends(oauth2Bearer)]):
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Could not validate credentials",
             )
-        return {"username": username, "userID": userID, "userRole": userRole}
+        return {"username": username, "id": userID, "userRole": userRole}
     except JWTError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

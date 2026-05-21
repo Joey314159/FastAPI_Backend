@@ -2,18 +2,12 @@ from typing import Annotated
 from fastapi import Depends, APIRouter, HTTPException, Path
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
-import Models
 from starlette import status
 from Models import Todos
-from Database import SessionLocal, engine
-from routers import Auth
+from Database import SessionLocal
 from .Auth import getCurrentUser
 
 router = APIRouter()
-
-Models.Base.metadata.create_all(bind=engine)
-
-router.include_router(Auth.router)
 
 
 def getDB():
@@ -26,11 +20,7 @@ def getDB():
         db.close()
 
 
-# First dependancy injection
 dbDependancy = Annotated[Session, Depends(getDB)]
-#                                 ^^^^^^^^^^^^^---- Tells FastAPI 'whenever a route needs this, automatically run getDB() and inject the results'
-#    This is helpful because instead of each route managing its own database session; we define it once and FastAPI
-#    knows to write it in wherever you ask for it
 userDependency = Annotated[dict, Depends(getCurrentUser)]
 
 
