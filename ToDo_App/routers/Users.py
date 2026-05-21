@@ -1,5 +1,6 @@
 from typing import Annotated
 from fastapi import Depends, APIRouter, HTTPException
+from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 from starlette import status
 from Models import Users
@@ -27,9 +28,32 @@ userDependency = Annotated[dict, Depends(getCurrentUser)]
 bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
+class UserVerification(BaseModel):
+    password: str
+    newPassword: str = Field(min_length=6)
+
+
 @router.get("/", status_code=status.HTTP_200_OK)
 async def getUser(user: userDependency, db: dbDependancy):
     if user is None:
         raise HTTPException(status_code=401, detail="Authentication Failed")
 
     return db.query(Users).filter(Users.id == user.get("id")).first()
+
+
+@router.put("/password", status_code=status.HTTP_204_NO_CONTENT)
+async def changePassword(
+    user: userDependency, db: dbDependancy, user_verification: UserVerification
+):
+    if user is None:
+        raise HTTPException(status_code=401, detail="Authentication failed")
+
+    userModel = db.query(Users).filter(Users.id == user.get("id")).first()
+
+    if not bcrypt_context.verify(user_verification.password, userModel.hashedPWD):
+        raise HTTPException(status_code=401, detail="Authentication failed")
+
+    userModel.hashedPWD = bcrypt_context.hash(user_verification.newPassword)
+
+    db.add(userModel)
+    db.commit()
