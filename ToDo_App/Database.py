@@ -20,14 +20,18 @@ from sqlalchemy.ext.declarative import declarative_base
         from Base, SQL_ALCHEMY recognizes a python class as a database table rather than a regular class. It is the 
         blueprint manager that connects our python models to the actual structure of the database
 """
-SQL_ALCHEMY_URL = "sqlite:///./todosapp.db"
+
+# SQL_ALCHEMY_URL = "sqlite:///./todosapp.db"
+SQL_ALCHEMY_URL = "postgresql://postgres:test1234!@localhost/TodoApplicationDatabase"
 """
         The reason why we are putting to check_same_thread to be false is because by default SQL Lite only allows one 
         thread to communicate with the data base. The reason SQL Lite does this is to prevent any kind of accident sharing 
         of the same connetion for different kind of requests. However in FastAPI it is very normal to have more than one 
         thread that can interact with the database at the same time which is why we want it to set it to false
 """
-engine = create_engine(SQL_ALCHEMY_URL, connect_args={"check_same_thread": False})
+# engine = create_engine(SQL_ALCHEMY_URL, connect_args={"check_same_thread": False}) the check_same_thread is for sqlite only so we don't need it for postgres
+
+engine = create_engine(SQL_ALCHEMY_URL)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
