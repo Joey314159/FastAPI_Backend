@@ -57,3 +57,14 @@ async def changePassword(
 
     db.add(userModel)
     db.commit()
+
+
+@router.put("/phonenumber/{phone_number}", status_code=status.HTTP_204_NO_CONTENT)
+async def changePhoneNumber(user: userDependency, db: dbDependancy, phone_number: str):
+    if user is None:
+        raise HTTPException(status_code=401, detail="Authentication failed")
+    userModel = db.query(Users).filter(Users.id == user.get("id")).first()
+    userModel.phone_number = phone_number
+
+    db.add(userModel)
+    db.commit()

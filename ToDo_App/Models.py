@@ -20,6 +20,7 @@ class Users(Base):
     hashedPWD = Column(String)
     isActive = Column(Boolean, default=True)
     role = Column(String)
+    phone_number = Column(String)
 
 
 class Todos(Base):

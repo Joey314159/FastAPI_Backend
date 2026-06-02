@@ -29,6 +29,7 @@ class CreateUserRequest(BaseModel):
     lastName: str
     password: str
     role: str
+    phone_number: str
 
 
 """
@@ -113,6 +114,7 @@ async def createUser(db: dbDependancy, createUserRequest: CreateUserRequest):
         # This means that even if someone got access into our database they would only see the hash
         hashedPWD=bcrypt_context.hash(createUserRequest.password),
         isActive=True,
+        phone_number=createUserRequest.phone_number,
     )
 
     db.add(createUserModel)
