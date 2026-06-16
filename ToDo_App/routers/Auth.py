@@ -2,9 +2,9 @@ from datetime import datetime, timedelta, timezone
 from fastapi import APIRouter, Depends, HTTPException
 from starlette import status
 from pydantic import BaseModel
-from Models import Users
+from ..Models import Users
 from passlib.context import CryptContext
-from Database import SessionLocal
+from ..Database import SessionLocal
 from typing import Annotated
 from sqlalchemy.orm import Session
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer

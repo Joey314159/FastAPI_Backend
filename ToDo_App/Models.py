@@ -1,4 +1,4 @@
-from Database import Base
+from .Database import Base
 
 """
     Models file is a way for SQL Alchemy to be able to understand what kind of database tables we are going

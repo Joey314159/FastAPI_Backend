@@ -3,8 +3,8 @@ from fastapi import Depends, APIRouter, HTTPException
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 from starlette import status
-from Models import Users
-from Database import SessionLocal
+from ..Models import Users
+from ..Database import SessionLocal
 from .Auth import getCurrentUser
 
 # Will be used to create a new hash since we are dealing with passwords
