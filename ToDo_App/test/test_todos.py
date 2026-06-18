@@ -1,11 +1,13 @@
 from fastapi import status
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.pool import StaticPool
 from sqlalchemy.orm import sessionmaker
 from ..Database import Base
 from ..routers.todos import getDB, getCurrentUser
 from ..Main import app
 from fastapi.testclient import TestClient
+import pytest
+from ..Models import Todos
 
 # Although I have PostgreSQL as my production database, I can still use sqLite as my local testing database
 # We will end up with 2 databases; one for production and one for testing
@@ -41,7 +43,36 @@ app.dependency_overrides[getCurrentUser] = override_get_current_user
 client = TestClient(app)
 
 
-def test_read_all_authenticated():
+@pytest.fixture()
+def test_todo():
+    todo = Todos(
+        title="Learn to code",
+        description="Need to learn everyday",
+        priority=5,
+        complete=False,
+        owner=1,
+    )
+
+    # Make sure that for the db you are using TestingSessionLocal
+    db = TestingSessionLocal()
+    db.add(todo)
+    db.commit()
+    yield todo
+    with engine.connect() as connection:
+        connection.execute(text("DELETE FROM todos;"))
+        connection.commit()
+
+
+def test_read_all_authenticated(test_todo):
     response = client.get("/")
     assert response.status_code == status.HTTP_200_OK
-    assert response.json() == []
+    assert response.json() == [
+        {
+            "complete": False,
+            "title": "Learn to code",
+            "description": "Need to learn everyday",
+            "id": 1,
+            "priority": 5,
+            "owner": 1,
+        }
+    ]
