@@ -51,7 +51,7 @@ async def readTodo(user: userDependency, db: dbDependancy, todo_id: int = Path(g
 
     if todoModel is not None:
         return todoModel
-    raise HTTPException(status_code=404, detail="Todo ID not found")
+    raise HTTPException(status_code=404, detail="Todo not found")
 
 
 @router.post("/todo", status_code=status.HTTP_201_CREATED)
