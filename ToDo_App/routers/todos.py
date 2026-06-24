@@ -106,7 +106,7 @@ async def deleteTodo(user: userDependency, db: dbDependancy, todo_id: int = Path
     )
 
     if todoModel is None:
-        raise HTTPException(status_code=404, detail="To Do ID was not found")
+        raise HTTPException(status_code=404, detail="Todo not found")
 
     db.query(Todos).filter(Todos.id == todo_id).filter(
         Todos.owner == user.get("id")
