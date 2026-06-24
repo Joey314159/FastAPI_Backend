@@ -82,7 +82,7 @@ async def updateTodo(
     )
 
     if todoModel is None:
-        raise HTTPException(status_code=404, detail="To Do ID not found")
+        raise HTTPException(status_code=404, detail="Todo not found")
 
     todoModel.title = todoRequest.title
     todoModel.description = todoRequest.description
