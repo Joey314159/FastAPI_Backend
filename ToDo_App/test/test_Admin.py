@@ -1,6 +1,7 @@
 from .utils import *
 from ..routers.Admin import getDB, getCurrentUser
 from fastapi import status
+from ..Models import Todos
 
 
 app.dependency_overrides[getDB] = override_get_db
@@ -20,3 +21,18 @@ def test_admin_read_all_authenticated(test_todo):
             "owner": 1,
         }
     ]
+
+
+def test_admin_delete_todo(test_todo):
+    response = client.delete("/admin/todo/1")
+    assert response.status_code == 204
+
+    db = TestingSessionLocal()
+    model = db.query(Todos).filter(Todos.id == 1).first()
+    assert model is None
+
+
+def test_admin_delete_todo_not_found():
+    response = client.delete("/admin/todo/999")
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Todo not found"}
