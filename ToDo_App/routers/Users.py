@@ -51,7 +51,7 @@ async def changePassword(
     userModel = db.query(Users).filter(Users.id == user.get("id")).first()
 
     if not bcrypt_context.verify(user_verification.password, userModel.hashedPWD):
-        raise HTTPException(status_code=401, detail="Authentication failed")
+        raise HTTPException(status_code=401, detail="Error on password change")
 
     userModel.hashedPWD = bcrypt_context.hash(user_verification.newPassword)
 
