@@ -5,9 +5,11 @@ from ..routers.Auth import (
     authenticateUser,
     SECRET_KEY,
     ALGORITHM,
+    getCurrentUser,
 )
 from jose import jwt
 from datetime import timedelta
+import pytest
 
 app.dependency_overrides[getDB] = override_get_db
 
@@ -40,3 +42,12 @@ def test_create_access_token():
     assert decoded_token["sub"] == username
     assert decoded_token["id"] == userID
     assert decoded_token["role"] == role
+
+
+@pytest.mark.asyncio
+async def test_get_current_user_valid_token():
+    encode = {"sub": "testuser", "id": 1, "role": "admin"}
+    token = jwt.encode(encode, SECRET_KEY, algorithm=ALGORITHM)
+
+    user = await getCurrentUser(token=token)
+    assert user == {"username": "testuser", "id": 1, "userRole": "admin"}
