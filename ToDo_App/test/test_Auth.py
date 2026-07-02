@@ -10,6 +10,7 @@ from ..routers.Auth import (
 from jose import jwt
 from datetime import timedelta
 import pytest
+from fastapi import HTTPException
 
 app.dependency_overrides[getDB] = override_get_db
 
@@ -51,3 +52,15 @@ async def test_get_current_user_valid_token():
 
     user = await getCurrentUser(token=token)
     assert user == {"username": "testuser", "id": 1, "userRole": "admin"}
+
+
+@pytest.mark.asyncio
+async def test_get_current_user_missin_payload():
+    encode = {"role": "user"}
+    token = jwt.encode(encode, SECRET_KEY, algorithm=ALGORITHM)
+
+    with pytest.raises(HTTPException) as excinfo:
+        await getCurrentUser(token=token)
+
+    assert excinfo.value.status_code == 401
+    assert excinfo.value.detail == "Could not validate credentials"
