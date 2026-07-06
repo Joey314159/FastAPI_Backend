@@ -7,7 +7,7 @@ from ..Models import Todos
 from ..Database import SessionLocal
 from .Auth import getCurrentUser
 
-router = APIRouter()
+router = APIRouter(prefix="/todos", tags=["todos"])
 
 
 def getDB():
