@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta, timezone
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from starlette import status
 from pydantic import BaseModel
 from ..Models import Users
@@ -9,6 +9,7 @@ from typing import Annotated
 from sqlalchemy.orm import Session
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from jose import jwt, JWTError
+from fastapi.templating import Jinja2Templates
 
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -62,6 +63,15 @@ def getDB():
 # First dependancy injection
 dbDependancy = Annotated[Session, Depends(getDB)]
 #                                 ^^^^^^^^^^^^^---- Tells FastAPI 'whenever a route needs this, automatically run getDB() and inject the results'
+
+templates = Jinja2Templates(directory="ToDo_App/templates")
+
+## Pages
+
+
+@router.get("/login-page")
+def render_login_page(request: Request):
+    return templates.TemplateResponse(request, "login.html")
 
 
 def authenticateUser(username: str, password: str, db):
