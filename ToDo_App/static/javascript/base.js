@@ -183,15 +183,15 @@
             const payload = {
                 email: data.email,
                 username: data.username,
-                first_name: data.firstname,
-                last_name: data.lastname,
+                firstName: data.firstname,
+                lastName: data.lastname,
                 role: data.role,
                 phone_number: data.phone_number,
                 password: data.password
             };
 
             try {
-                const response = await fetch('/auth', {
+                const response = await fetch('/auth/', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -204,7 +204,8 @@
                 } else {
                     // Handle error
                     const errorData = await response.json();
-                    alert(`Error: ${errorData.message}`);
+                    //alert(`Error: ${errorData.detail}`);
+                    alert(`Error: ${JSON.stringify(errorData.detail)}`);
                 }
             } catch (error) {
                 console.error('Error:', error);
