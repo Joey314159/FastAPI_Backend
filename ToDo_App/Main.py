@@ -1,22 +1,24 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, status
 from .Models import Base
 from .Database import engine
 from .routers import Auth, todos, Admin, Users
-from fastapi.templating import Jinja2Templates
+# from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import RedirectResponse
 
 app = FastAPI()
 
 Base.metadata.create_all(bind=engine)
 
-templates = Jinja2Templates(directory="ToDo_App/templates")
+# templates = Jinja2Templates(directory="ToDo_App/templates")
 
 app.mount("/static", StaticFiles(directory="ToDo_App/static"), name="static")
 
 
 @app.get("/")
 def test(request: Request):
-    return templates.TemplateResponse(request, "home.html")
+    return RedirectResponse(url="/todos/todo-page", status_code=status.HTTP_302_FOUND)
+    # return templates.TemplateResponse(request, "home.html")
 
 
 # This is the old convention down here that will eventually depricate
